@@ -17,8 +17,14 @@ void rtc_setup(void) {
         while( !(RTC->ISR1 & RTC_ISR1_INITF) );
 
         // Set time
+        RTC->TR3 = 0x10;
+        RTC->TR2 = 0x00;
+        RTC->TR1 = 0x00;
 
         // Set date
+        RTC->DR1 = 0x01;
+        RTC->DR2 = 0x01;
+        RTC->DR3 = 0x20;
 
         // Exit init mode
         RTC->ISR1 = 0x00;

@@ -37,6 +37,7 @@ int main(void) {
 	
 	uint8_t lcd_digit[6];
 	uint8_t tmp;
+	uint8_t clk = 0;
 
 	setup();
 	lcd_setup();
@@ -51,17 +52,39 @@ int main(void) {
 			ChgBit(GPIOE->ODR, 7);
 			ChgBit(GPIOC->ODR, 7);
 
-			tmp = RTC->TR3;
-			lcd_digit[0] = (tmp>>4) + '0';
-			lcd_digit[1] = (tmp & 0xCF) + '0';
+			if ( clk > 7) {
+				tmp = RTC->DR3;
 
-			tmp = RTC->TR2;
-			lcd_digit[2] = (tmp>>4) + '0';
-			lcd_digit[3] = (tmp & 0x0F) + '0';
+				lcd_digit[0] = (tmp>>4) + '0';
+				lcd_digit[1] = (tmp & 0xCF) + '0';
 
-			tmp = RTC->TR1;
-			lcd_digit[4] = (tmp>>4) + '0';
-			lcd_digit[5] = (tmp & 0x0F) + '0';
+				lcd_digit[2] = ((RTC->DR2>>4)&0x01) + '0';
+				lcd_digit[3] = (RTC->DR2 & 0x0F) + '0';
+
+				lcd_digit[4] = (RTC->DR1>>4) + '0';
+				lcd_digit[5] = (RTC->DR1 & 0x0F) + '0';
+
+				if (tmp < 1) {
+					rtc_setup();
+				}
+
+				if ( clk > 10 ) {
+					clk = 0;
+				}
+
+			} else {
+				lcd_digit[0] = (RTC->TR3>>4) + '0';
+				lcd_digit[1] = (RTC->TR3 & 0xCF) + '0';
+
+				lcd_digit[2] = (RTC->TR2>>4) + '0';
+				lcd_digit[3] = (RTC->TR2 & 0x0F) + '0';
+
+				lcd_digit[4] = (RTC->TR1>>4) + '0';
+				lcd_digit[5] = (RTC->TR1 & 0x0F) + '0';
+				tmp = RTC->DR3;
+			}
+
+			clk++;
 
 			LCD_GLASS_WriteChar(&lcd_digit[0], 0, 0, 0);
 			LCD_GLASS_WriteChar(&lcd_digit[1], 0, 1, 1);
